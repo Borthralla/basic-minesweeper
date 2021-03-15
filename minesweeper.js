@@ -1,0 +1,1 @@
+console.log("Hopefully this js will produce minesweeper")
