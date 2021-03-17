@@ -145,9 +145,11 @@ class Gui {
 		this.board.generate_tiles()
 		this.first_click = false
 		this.canvas = document.getElementById("game")
+		this.previously_pressed = []
 		this.ctx = this.canvas.getContext("2d", { alpha: false });
 		this.canvas.addEventListener("mousedown", this.on_mouse_down.bind(this))
 		this.canvas.addEventListener("mouseup", this.on_mouse_up.bind(this))
+		this.canvas.addEventListener("mousemove", this.draw_tile_effects.bind(this))
 	}
 
 	resize() {
@@ -191,6 +193,13 @@ class Gui {
 		this.ctx.drawImage(this.images[image_key], x, y)
 	}
 
+	draw_pressed(index) {
+		var tile = this.board.tiles[index]
+		var y = this.board.row(index) * this.tile_size
+		var x = this.board.column(index) * this.tile_size
+		this.ctx.drawImage(this.images[0], x, y)
+	}
+
 	draw_board() {
 		for (var i = 0; i < this.board.width * this.board.height; i++) {
 			this.draw_tile(i)
@@ -209,6 +218,7 @@ class Gui {
 			this.board.flag(index)
 			this.draw_tile(index)
 		}
+		this.draw_tile_effects(event)
 	}
 
 	on_mouse_up(event) {
@@ -216,9 +226,45 @@ class Gui {
 		let tile = this.board.tiles[index]
 		if (tile.revealed && event.buttons != 0) {
 			this.board.chord(index)
+			this.draw_tile_effects(event)
 		} else if (event.button == 0 && !tile.revealed) {
 			this.board.reveal(index)
+			this.draw_tile_effects(event)
 		}
+		this.draw_tile_effects(event)
+	}
+
+	draw_tile_effects(event) {
+		let pressed_tiles = []
+		let index = this.get_index(event)
+		if (event.buttons == 1) {
+			let tile = this.board.tiles[index]
+			if (!tile.revealed && !tile.flagged) {
+				pressed_tiles.push(index)
+				if (!this.previously_pressed.includes(index)) {
+					this.draw_pressed(index)
+				}
+			}
+			
+		}
+		if (event.buttons == 3) {
+			for (var neighbor of this.board.radius(index)) {
+				let neighbor_tile = this.board.tiles[neighbor]
+				if (neighbor_tile.revealed || neighbor_tile.flagged) {
+					continue
+				}
+				pressed_tiles.push(neighbor)
+				if (!this.previously_pressed.includes(neighbor)) {
+					this.draw_pressed(neighbor)
+				}
+			}
+		}
+		for (var previously_pressed of this.previously_pressed) {
+			if (!pressed_tiles.includes(previously_pressed)) {
+				this.draw_tile(previously_pressed)
+			}
+		}
+		this.previously_pressed = pressed_tiles
 	}
 }
 
