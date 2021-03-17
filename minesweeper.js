@@ -215,12 +215,9 @@ class Gui {
 	on_mouse_up(event) {
 		let index = this.get_index(event)
 		let tile = this.board.tiles[index]
-		console.log(index, event.button, event.buttons)
 		if (tile.revealed && event.buttons != 0) {
-			console.log("Chording!")
 			this.board.chord(index)
 		} else if (event.button == 0 && !tile.revealed) {
-			console.log(event.buttons)
 			this.board.reveal(index)
 		}
 	}
