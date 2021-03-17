@@ -146,7 +146,6 @@ class Gui {
 		this.first_click = false
 		this.canvas = document.getElementById("game")
 		this.ctx = this.canvas.getContext("2d", { alpha: false });
-		this.resize()
 		this.canvas.addEventListener("mousedown", this.on_mouse_down.bind(this))
 		this.canvas.addEventListener("mouseup", this.on_mouse_up.bind(this))
 	}
@@ -224,4 +223,7 @@ class Gui {
 }
 
 var gui = new Gui()
-gui.load_images().then(() => gui.draw_board())
+gui.load_images().then(() => {
+	gui.resize()
+	gui.draw_board()
+})
