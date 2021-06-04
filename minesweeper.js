@@ -143,13 +143,14 @@ class Gui {
 		this.board = new Board(30, 16, 99)
 		this.board.gui = this
 		this.board.generate_tiles()
-		this.first_click = false
+		this.first_click = true
 		this.canvas = document.getElementById("game")
 		this.previously_pressed = []
 		this.ctx = this.canvas.getContext("2d", { alpha: false });
 		this.canvas.addEventListener("mousedown", this.on_mouse_down.bind(this))
 		this.canvas.addEventListener("mouseup", this.on_mouse_up.bind(this))
 		this.canvas.addEventListener("mousemove", this.draw_tile_effects.bind(this))
+		document.addEventListener("keydown", this.on_key.bind(this))
 	}
 
 	resize() {
@@ -228,10 +229,26 @@ class Gui {
 			this.board.chord(index)
 			this.draw_tile_effects(event)
 		} else if (event.button == 0 && !tile.revealed) {
+			if (this.first_click) {
+				this.board.generate_tiles(this.board.radius(index))
+				this.first_click = false
+			}
 			this.board.reveal(index)
 			this.draw_tile_effects(event)
 		}
 		this.draw_tile_effects(event)
+	}
+
+	on_key(event) {
+		if (event.key == "r") {
+			this.reset()
+		}
+	}
+
+	reset() {
+		this.board.generate_tiles()
+		this.first_click = true
+		this.draw_board()
 	}
 
 	draw_tile_effects(event) {
@@ -245,7 +262,6 @@ class Gui {
 					this.draw_pressed(index)
 				}
 			}
-			
 		}
 		if (event.buttons == 3) {
 			for (var neighbor of this.board.radius(index)) {
